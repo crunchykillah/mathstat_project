@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import scipy.stats as stats
 from sklearn.linear_model import LinearRegression
+import scipy.stats as stats
+
 
 
 # Загрузка данных
@@ -97,6 +99,8 @@ plt.show()
 
 
 
+
+
 # 444444444 #
 # Поиск выбросов с помощью межквартильного размаха
 print('Emissions: ')
@@ -115,16 +119,28 @@ print(filtered_df)
 
 
 # 555555 #
-# Проверка гипотезы о среднем значении
-# Нулевая гипотеза: среднее значение равно "2020.51551167733" (это mean для Model Year)
-mean_hypothesis_test = stats.ttest_1samp(sample, 2020.51551167733)
+# Сравнение электрического диапазона между теслой и ниссаном
+# H₀: Медианы электрического диапазона автомобилей TESLA и NISSAN одинаковы.
+tesla_range = df[(df["Make"] == "TESLA") & (df["Electric Range"] > 0)]["Electric Range"]
+nissan_range = df[(df["Make"] == "NISSAN") & (df["Electric Range"] > 0)]["Electric Range"]
 
-print(f"t-test : {mean_hypothesis_test}" + "\n")
+# Проверка на наличие данных в выборках
+if len(tesla_range) > 0 and len(nissan_range) > 0:
+    # Тест Манна-Уитни
+    u_test = stats.mannwhitneyu(tesla_range, nissan_range, alternative='two-sided')
 
-if mean_hypothesis_test.pvalue > alpha:
-    print("there is no reason to reject the null hypothesis" + "\n")
+    print(f"Mann-Whitney U test: U-statistic = {u_test.statistic}, p-value = {u_test.pvalue}")
+
+    alpha = 0.05
+    if u_test.pvalue > alpha:
+        print("There is no reason to reject the null hypothesis")
+    else:
+        print("Null hypothesis rejected")
 else:
-    print("null hypothesis rejected" + "\n")
+    print("Not enough data to perform the Mann-Whitney U test")
+
+
+
 
 # Проверка гипотезы о нормальности распределения
 # Нулевая гипотеза: данные распределены нормально
